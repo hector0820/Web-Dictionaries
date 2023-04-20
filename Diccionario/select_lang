@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DictLang=$(\
+	zenity --list \
+	  --title="Selecciona un Idioma" \
+	  --column="Idiomas" \
+	    Español \
+	    English \
+	    Português 
+    )
+
+echo ${DictLang} > ~/.diccionario_Lang

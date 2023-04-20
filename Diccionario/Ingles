@@ -1,0 +1,23 @@
+#!/bin/bash
+
+Ingles () {
+
+	### Creates a languages folder to save data
+	[[ ! -d "$DICCIONARIO/$DictLang" ]] && mkdir -p "$DICCIONARIO/$DictLang"
+	
+	### Show a list of offline words into our diccionary
+	
+	CLIP=$(xclip -o | tr '[:upper:]' '[:lower:]')
+	PALABRA="$(echo -e "${CLIP}\n$(ls "$DICCIONARIO/$DictLang")" | dmenu -p "Which word are you looking for? ")"
+	echo $PALABRA
+	[[ -z ${PALABRA} ]] && exit 0
+	
+	[[ ! -f $DICCIONARIO/$DictLang/$PALABRA ]] && \
+		echo $PALABRA > $DICCIONARIO/WORD && \
+		python3 "/home/elvis/Documents/Coding/ReadLoud/Diccionario/Ingles-python" && \
+		rm $DICCIONARIO/WORD 
+	### Make a info panel
+	zenity --info \
+		--title="Definición" \
+		--text="$(cat "$DICCIONARIO/$DictLang/$PALABRA")"
+	}	

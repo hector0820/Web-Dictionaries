@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DictLang=$(cat ~/.diccionario_Lang)
+
+case $DictLang in
+	Español)
+		DictLang="es";;
+	Português)
+		DictLang="pt";;
+	English)
+		DictLang="en";;
+esac
+
+xclip -out -selection primary | xclip -in -selection clipboard 
+echo -n $(xclip -o -selection clipboard) | gtts-cli - --lang $DictLang | mpv - --speed=1.3

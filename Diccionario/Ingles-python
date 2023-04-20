@@ -1,0 +1,74 @@
+#!/bin/python3
+
+import requests
+import re
+from bs4 import BeautifulSoup
+
+file = open("/home/elvis/Documents/Diccionario/WORD", "r")
+word = re.findall('(.*)\n', file.read())[0]
+
+urls = { "english": 'https://dictionary.cambridge.org/dictionary/english-spanish/{}/'.format(word) }
+
+try: lang
+except NameError: lang = "english"
+
+
+# ========================================================================
+# ========================FUNCTIONS=======================================
+# ========================================================================
+
+def diccionario():
+    headers = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36' }
+    return requests.get(urls[lang], headers=headers).content 
+
+def soup(page):
+    soup = BeautifulSoup(page, 'html.parser')
+
+    definitions = soup.find_all("div", {"class": "ddef_d"})
+    definition = [ definition.text.capitalize() for definition in definitions ]
+    definition = [ re.split(':', i)[0] for i in definition ]
+
+    return definition
+
+def sopa(page):
+    soup = BeautifulSoup(page, 'html.parser')
+
+    definitions = soup.find_all("span", {"class": ["trans",  "dtrans",  "dtrans-se"]})
+    definition = [ definition.text.capitalize() for definition in definitions ]
+    definition = [ re.split(':', i)[0] for i in definition ]
+    definitions = []
+
+    for word in definition:
+        size = len(re.findall('^\n\s+(\w.*)', word))
+        if size == 1:
+            definitions.append(re.findall('^\n\s+(\w.*)', word)[0])
+
+    if len(definitions) > 2:
+        definitions = [ definitions[0], definitions[2] ]
+    else:
+        definitions = definitions[0]
+
+    return definitions
+
+def numeric(definitions):
+    count = 0
+    for definition in definitions:
+        definitions[count] = "{}: {}".format( count + 1, definition )
+        count += 1
+    return definitions
+
+# ========================================================================
+
+page = diccionario()
+definitions = soup(page)
+definiciones = sopa(page)
+
+# ========================================================================
+
+español = "\n".join(numeric(definiciones))
+ingles = "\n".join(numeric(definitions))
+
+# ========================================================================
+
+file = open("/home/elvis/Documents/Diccionario/English/{}".format(word), "w")
+file.write('En español\n\n{} \n\nEn inglés\n\n{}'.format(español, ingles))
